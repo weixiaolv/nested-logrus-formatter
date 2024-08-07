@@ -136,6 +136,12 @@ func main() {
   
   // print log
   log.Info("log level ", levelConfig)
+
+  // Output: while levelConfig = "debug"
+  // 2024-08-07 00:05:10.378 [main.go::main()::55] [INFO] [test] log level debug
+
+  // Output: while levelConfig = "info"
+  // 2024-08-07 00:05:10.378 [INFO] [test] log level info
 }
 ```
 
@@ -160,23 +166,32 @@ make test
 make cover
 ```
 
-benchmark
+test case coverage 98% source code
+
+## Benchmark
+
+run:
 
 ```sh
-# new prof
 make bench
+```
 
-# show prof
+result:
+
+```log
+BenchmarkDefaultFormat-4          507812   2731 ns/op  716 B/op  14 allocs/op
+BenchmarkNestedLogrusFormatter-4  793026   1939 ns/op  644 B/op  11 allocs/op
+BenchmarkToFile-4                 592366   1914 ns/op  644 B/op  11 allocs/op
+BenchmarkNoFields-4              1000000   1360 ns/op  396 B/op   8 allocs/op
+```
+
+1. NestedLogrusFormatter a little faster than logrus DefaultFormat
+2. Benchmark default output is io.Discard, log out to file with bufio.Writer, the performance is not bad.
+3. Log out no fields means no interface{} to string convert, reduce allocs/op, 30% faster.
+
+more info cpu profile & mem profile
+
+```sh
 make cpuprof
 make memprof
 ```
-
-benchmark result
-
-```log
-enchmarkDefaultFormat-4           550015   2121 ns/op  684 B/op  14 allocs/op
-BenchmarkNestedLogrusFormatter-4  685206   2140 ns/op  620 B/op  10 allocs/op
-BenchmarkNoFields-4              1616091  726.0 ns/op  328 B/op   7 allocs/op
-```
-
-NestedLogrusFormatter a little faster than default format. NoFields means no interface{} to string convert, reduce allocs/op.
